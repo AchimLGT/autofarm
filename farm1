@@ -1,0 +1,144 @@
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local LocalPlayer = Players.LocalPlayer
+local TARGET_PLACE_ID = 6912372358
+local FINAL_PLACE_ID = 3231515867
+
+-- Function to kill all NPCs
+local function killAllNPCs()
+	for _, descendant in pairs(Workspace:GetDescendants()) do
+		if descendant:IsA("Humanoid") and descendant.Parent then
+			local player = Players:GetPlayerFromCharacter(descendant.Parent)
+			if not player then
+				descendant.Health = 0
+				if descendant.Parent then
+					descendant.Parent:BreakJoints()
+				end
+			end
+		end
+	end
+end
+
+-- Function to tween player to a position
+local function tweenToPosition(targetPosition)
+	local character = LocalPlayer.Character
+	if not character or not character:FindFirstChild("HumanoidRootPart") then
+		warn("Character or HumanoidRootPart not found")
+		return false
+	end
+	
+	local humanoidRootPart = character.HumanoidRootPart
+	local tweenInfo = TweenInfo.new(
+		5, -- Duration for smooth movement
+		Enum.EasingStyle.Linear,
+		Enum.EasingDirection.InOut
+	)
+	
+	local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
+	tween:Play()
+	
+	-- Wait for tween to complete
+	local success = pcall(function()
+		tween.Completed:Wait()
+	end)
+	
+	if success then
+		print("Successfully tweened to position: " .. tostring(targetPosition))
+	else
+		warn("Tween failed for position: " .. tostring(targetPosition))
+	end
+	return success
+end
+
+-- Function to teleport to a place
+local function teleportToPlace(placeId)
+	print("Attempting to teleport to Place ID: " .. placeId)
+	local success, errorMsg = pcall(function()
+		TeleportService:Teleport(placeId, LocalPlayer)
+	end)
+	if not success then
+		warn("Teleport failed: " .. tostring(errorMsg))
+	end
+end
+
+-- Main logic
+local function main()
+	while true do
+		local currentPlaceId = game.PlaceId
+		print("Current Place ID: " .. currentPlaceId)
+
+		if currentPlaceId ~= TARGET_PLACE_ID then
+			teleportToPlace(TARGET_PLACE_ID)
+			-- Wait briefly to avoid spamming teleport attempts
+			wait(5)
+			continue -- Continue loop to check place again after teleport
+		end
+
+		-- Ensure character is loaded
+		if not LocalPlayer.Character then
+			print("Waiting for character to load...")
+			LocalPlayer.CharacterAppearanceLoaded:Wait()
+		end
+		print("Character loaded")
+
+		-- Start NPC killing loop
+		local connection
+		local success, errorMsg = pcall(function()
+			connection = RunService.Heartbeat:Connect(function()
+				killAllNPCs()
+			end)
+			print("NPC killing loop started")
+		end)
+		if not success then
+			warn("Failed to start NPC killing loop: " .. tostring(errorMsg))
+			wait(1)
+			continue
+		end
+
+		-- Wait 10 seconds before starting tweens
+		print("Waiting 10 seconds before first tween...")
+		wait(10)
+
+		-- Define target positions
+		local positions = {
+			Vector3.new(623, 4, 1067),
+			Vector3.new(793, 4, -204),
+			Vector3.new(349, 4, -170),
+			Vector3.new(659, 4, 7)
+		}
+
+		-- Tween to each position sequentially
+		for i, pos in ipairs(positions) do
+			print("Attempting to tween to position " .. i .. ": " .. tostring(pos))
+			if not tweenToPosition(pos) then
+				warn("Failed to tween to position: " .. tostring(pos))
+			end
+			-- Small delay to ensure stability
+			wait(1)
+		end
+
+		-- Wait 10 seconds after final tween
+		print("Waiting 10 seconds before final teleport...")
+		wait(10)
+
+		-- Stop NPC killing loop
+		if connection then
+			connection:Disconnect()
+			print("NPC killing loop stopped")
+		end
+
+		-- Teleport to final place
+		teleportToPlace(FINAL_PLACE_ID)
+		break -- Exit loop after final teleport
+	end
+end
+
+-- Run main with error handling
+local success, errorMsg = pcall(main)
+if not success then
+	warn("Script failed: " .. tostring(errorMsg))
+end
