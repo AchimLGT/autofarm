@@ -47,16 +47,16 @@ local function tweenToPosition(targetPosition)
 	end)
 	
 	if success then
-		print("Successfully tweened to position: " .. tostring(targetPosition))
+		print(tween başarılı: " .. tostring(targetPosition))
 	else
-		warn("Tween failed for position: " .. tostring(targetPosition))
+		warn("tween başarısız çoluğunu çocğunu: " .. tostring(targetPosition))
 	end
 	return success
 end
 
 -- Function to teleport to a place
 local function teleportToPlace(placeId)
-	print("Attempting to teleport to Place ID: " .. placeId)
+	print("place e ışınlanılıyor | : " .. placeId)
 	local success, errorMsg = pcall(function()
 		TeleportService:Teleport(placeId, LocalPlayer)
 	end)
@@ -69,7 +69,7 @@ end
 local function main()
 	while true do
 		local currentPlaceId = game.PlaceId
-		print("Current Place ID: " .. currentPlaceId)
+		print("şu anki place: " .. currentPlaceId)
 
 		if currentPlaceId ~= TARGET_PLACE_ID then
 			teleportToPlace(TARGET_PLACE_ID)
@@ -80,10 +80,10 @@ local function main()
 
 		-- Ensure character is loaded
 		if not LocalPlayer.Character then
-			print("Waiting for character to load...")
+			print("Karakter yükleniyor...")
 			LocalPlayer.CharacterAppearanceLoaded:Wait()
 		end
-		print("Character loaded")
+		print("karakter yüklendi")
 
 		-- Start NPC killing loop
 		local connection
@@ -91,7 +91,7 @@ local function main()
 			connection = RunService.Heartbeat:Connect(function()
 				killAllNPCs()
 			end)
-			print("NPC killing loop started")
+			print("kill aura başladıporno")
 		end)
 		if not success then
 			warn("Failed to start NPC killing loop: " .. tostring(errorMsg))
@@ -100,8 +100,8 @@ local function main()
 		end
 
 		-- Wait 10 seconds before starting tweens
-		print("Waiting 10 seconds before first tween...")
-		wait(10)
+		print("kick yememek için bekliyorum kral 😡💔👿")
+		wait(5)
 
 		-- Define target positions
 		local positions = {
@@ -113,32 +113,27 @@ local function main()
 
 		-- Tween to each position sequentially
 		for i, pos in ipairs(positions) do
-			print("Attempting to tween to position " .. i .. ": " .. tostring(pos))
+			print("şu pozisyona gidiliyo r : " .. i .. ": " .. tostring(pos))
 			if not tweenToPosition(pos) then
-				warn("Failed to tween to position: " .. tostring(pos))
+				warn("pozisyona gidilemedi: " .. tostring(pos))
 			end
-			-- Small delay to ensure stability
-			wait(1)
+			wait(0.3)
 		end
 
-		-- Wait 10 seconds after final tween
-		print("Waiting 10 seconds before final teleport...")
+		print("tween bitti, oyuna dönülüyor...")
 		wait(10)
 
-		-- Stop NPC killing loop
 		if connection then
 			connection:Disconnect()
-			print("NPC killing loop stopped")
+			print("killaura durduruldu)
 		end
 
-		-- Teleport to final place
 		teleportToPlace(FINAL_PLACE_ID)
-		break -- Exit loop after final teleport
+		break
 	end
 end
 
--- Run main with error handling
 local success, errorMsg = pcall(main)
 if not success then
-	warn("Script failed: " .. tostring(errorMsg))
+	warn("yarra yedik patch: " .. tostring(errorMsg))
 end
